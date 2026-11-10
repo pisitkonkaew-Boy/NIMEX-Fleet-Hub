@@ -1,0 +1,61 @@
+/* NIMEX Fleet Hub — Apps Script (วางใน Extensions > Apps Script ของ Google Sheet ใหม่ บันทึกเป็น Code.gs)
+   Script Properties: ADMIN_KEY = รหัสผู้ดูแล (ใช้รหัสเดียวกับระบบอื่น)
+   Deploy > New deployment > Web app > Execute as: Me · Who has access: Anyone → คัดลอก URL /exec ใส่ HUB_API ใน config.js
+   แท็บ Settings และ Log สร้างให้อัตโนมัติ */
+var ALLOWED = { style: ['a', 'b'] };
+/* hidden = รายชื่อ id ระบบที่ซ่อนจากผู้ชม */
+function valid_(k, v) {
+  if (k === 'hidden') return Array.isArray(v) && v.length <= 60 && v.every(function (x) { return typeof x === 'string' && /^[a-z0-9-]{1,30}$/.test(x); });
+  return !!ALLOWED[k] && ALLOWED[k].indexOf(v) >= 0;
+}
+
+function tab_(name, head) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet(), t = ss.getSheetByName(name);
+  if (!t) { t = ss.insertSheet(name); t.appendRow(head); t.setFrozenRows(1); }
+  return t;
+}
+function readSettings_() {
+  var t = tab_('Settings', ['key', 'value']), n = t.getLastRow(), o = {};
+  if (n > 1) t.getRange(2, 1, n - 1, 2).getValues().forEach(function (r) {
+    if (r[0] !== '') { try { o[String(r[0])] = JSON.parse(r[1]); } catch (e) { o[String(r[0])] = r[1]; } }
+  });
+  return o;
+}
+function writeSettings_(o) {
+  var t = tab_('Settings', ['key', 'value']), n = t.getLastRow();
+  if (n > 1) t.getRange(2, 1, n - 1, 2).clearContent();
+  var rows = Object.keys(o).map(function (k) { return [k, JSON.stringify(o[k])]; });
+  if (rows.length) { t.getRange(2, 1, rows.length, 2).setNumberFormat('@'); t.getRange(2, 1, rows.length, 2).setValues(rows); }
+}
+function json_(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }
+
+function doGet() {
+  var c = CacheService.getScriptCache(), s = c.get('hub');
+  if (!s) { s = JSON.stringify({ ok: true, settings: readSettings_() }); c.put('hub', s, 21600); }
+  return ContentService.createTextOutput(s).setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  var b;
+  try { b = JSON.parse(e.postData.contents); } catch (x) { return json_({ ok: false, error: 'bad_request' }); }
+  var key = PropertiesService.getScriptProperties().getProperty('ADMIN_KEY');
+  if (!key) return json_({ ok: false, error: 'admin_key_not_set' });
+  if (!b.key || b.key !== key) { Utilities.sleep(1200); return json_({ ok: false, error: 'denied' }); }
+  if (b.a === 'auth') return json_({ ok: true });
+  if (b.a === 'settings') {
+    var lock = LockService.getScriptLock();
+    if (!lock.tryLock(20000)) return json_({ ok: false, error: 'busy' });
+    try {
+      var cur = readSettings_(), inc = b.settings || {};
+      for (var k in inc) {
+        if (!valid_(k, inc[k])) return json_({ ok: false, error: 'bad_value', key: k });
+        cur[k] = inc[k];
+      }
+      writeSettings_(cur);
+      tab_('Log', ['time', 'action', 'detail']).appendRow([new Date(), 'settings', JSON.stringify(inc)]);
+      CacheService.getScriptCache().remove('hub');
+      return json_({ ok: true, settings: cur });
+    } finally { lock.releaseLock(); }
+  }
+  return json_({ ok: false, error: 'unknown' });
+}
