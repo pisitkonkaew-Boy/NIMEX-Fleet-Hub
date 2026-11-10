@@ -172,3 +172,41 @@ svg.i{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-widt
 .sb .cw .vis{background:#0b2552;border-color:rgba(212,175,55,.45);color:#f0d57a}
 .sb .cw.is-hidden .vis{background:var(--bad);border-color:var(--bad);color:#fff}
 .grid>*{min-width:0}.card .f{gap:8px}.card .url{min-width:0;flex:1}
+
+/* ===== admin: card actions, group tools, empty-slot controls ===== */
+.cw .vis{position:static}
+.cw .acts{position:absolute;top:10px;right:10px;z-index:2;display:flex;gap:6px}
+.act{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line2);background:var(--panel);color:var(--s1);border-radius:999px;padding:4px 10px 4px 8px;font-size:12px;line-height:1.2;min-height:28px}
+.act svg.i{width:15px;height:15px}
+.act:hover{border-color:var(--s1)}
+.act.pri{background:var(--navy);border-color:var(--navy);color:#fff}
+.cw.is-hidden .act.vis{background:var(--bad);border-color:var(--bad);color:#fff}
+.cw .card .h{padding-right:120px}
+.card .go{display:inline-flex;align-items:center;gap:4px}
+.card .go svg.i{width:14px;height:14px}
+.gh{flex-wrap:wrap}
+.gtools{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.gt{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line2);background:var(--panel);color:var(--ink);border-radius:999px;padding:6px 12px;font-size:12.5px}
+.gt svg.i{width:15px;height:15px}
+.gt.pri{background:var(--gold);border-color:var(--gold);color:#fff}
+.card.slot.adm{gap:8px}
+.card.slot .sa{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.card.slot.is-off{opacity:.5;background:repeating-linear-gradient(135deg,transparent 0 10px,rgba(127,140,170,.08) 10px 20px)}
+.sb .act,.sb .gt{background:#0b2552;border-color:rgba(212,175,55,.45);color:#f0d57a}
+.sb .act.pri{background:#d4af37;border-color:#d4af37;color:#0a2a5e}
+.sb .gt.pri{background:#d4af37;border-color:#d4af37;color:#0a2a5e}
+.sb .cw.is-hidden .act.vis{background:var(--bad);border-color:var(--bad);color:#fff}
+@media (max-width:640px){.gtools{margin-left:0;width:100%}.grid.g3 .card.slot.adm{flex-direction:column;align-items:center;padding:14px}.cw .card .h{padding-right:0;padding-top:30px}}
+
+/* ===== add / edit system dialog ===== */
+.modal form.wide{max-width:460px;max-height:calc(100vh - 32px);overflow:auto}
+.modal label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
+.modal input,.modal textarea,.modal select{border:1px solid var(--line2);border-radius:10px;padding:9px 12px;background:var(--bg);color:var(--ink);font:inherit;font-size:14px}
+.modal textarea{resize:vertical}
+.modal .lbl{font-size:13px;color:var(--muted)}
+.icpick{display:grid;grid-template-columns:repeat(auto-fill,minmax(42px,1fr));gap:6px}
+.icpick button{height:42px;border-radius:10px;border:1px solid var(--line2);background:var(--panel);color:var(--navy);display:grid;place-items:center}
+.icpick button.on{background:var(--navy);border-color:var(--navy);color:var(--gold-l)}
+:root[data-theme="dark"] .icpick button{color:#cfe0ff}
+.btn.del{background:transparent;color:var(--bad);border:1px solid var(--bad)}
+.cw>.card{min-width:0;width:100%}.card p{overflow-wrap:anywhere}

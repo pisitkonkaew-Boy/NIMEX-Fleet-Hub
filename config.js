@@ -1,6 +1,6 @@
 /* NIMEX Fleet Hub — ทะเบียนระบบ
    เพิ่ม/ลบ/ย้ายระบบได้ที่นี่ แล้วเพิ่มเลข HUB_V เพื่อล้างแคชผู้ชม */
-window.HUB_V = 3;
+window.HUB_V = 4;
 /* Apps Script ของ Hub (ลงท้าย /exec) ใช้เก็บค่าที่ผู้ดูแลตั้ง เช่น หน้าตา A/B ให้ผู้ชมทุกคนเห็นเหมือนกัน
    ถ้ายังว่าง ปุ่มสลับหน้าตาจะเปลี่ยนเฉพาะเครื่องที่กด */
 window.HUB_API = 'https://script.google.com/macros/s/AKfycbyvOfkpQQdf4mqR5H2rw6vnzYH6InxMFMM6VL-Ly9OwMQjYpR2MF5R05ozUTai5BJAe/exec';
