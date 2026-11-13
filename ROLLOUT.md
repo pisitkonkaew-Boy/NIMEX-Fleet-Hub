@@ -66,7 +66,6 @@
 | Pickup Vehicle | NIMEX-Pickup-Vehicle-Dashboard | ใช้ Sheet อยู่แล้ว |
 | Inbound Cost | NIMEX-Inbound-Cost-Dashboard | ใช้ Sheet อยู่แล้ว |
 | Vehicle P&L | NIMEX-Vehicle-P-L-Dashboard | ใช้ Sheet อยู่แล้ว |
-| Car Performance | NIMEX-Car-Performance-Dashboard | ใช้ Sheet อยู่แล้ว |
 | Fleet Card | NIMEX-Fleet-Card-Dashboard | ใช้ Sheet อยู่แล้ว แต่ยังเป็นไฟล์เดียว 1.3 MB |
 
-**ทำเสร็จแล้ว:** Check-in Performance, Fleet Transport Operator, Delivery Driver Performance, Fleet Performance (share.js: อินโฟกราฟิก 16:9 ตั้งค่าการ์ด/กราฟ 4 ช่อง/เกรด A–F ได้ + ดีสุด/แย่สุดทุกตัวชี้วัด)
+**ทำเสร็จแล้ว:** Check-in Performance, Fleet Transport Operator, Delivery Driver Performance, Fleet Performance (share.js: อินโฟกราฟิก 16:9 ตั้งค่าการ์ด/กราฟ 4 ช่อง/เกรด A–F ได้ + ดีสุด/แย่สุดทุกตัวชี้วัด), Car Performance (share.js: อินโฟกราฟิก 16:9 เลือกกราฟ 4 ช่องได้ 9 แบบ + ดีสุด/แย่สุด 7 ตัวชี้วัด)
