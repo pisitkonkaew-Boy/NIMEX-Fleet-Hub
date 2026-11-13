@@ -1,0 +1,73 @@
+# คำสั่งแยกทำ: ปุ่มแชร์/ส่งออก + อินโฟกราฟิก 16:9 (ระบบละ 1 แชท)
+
+วิธีใช้: เปิดแชทใหม่แล้วพิมพ์
+
+> ทำระบบ &lt;ชื่อระบบ&gt; ตามคำสั่งใน https://github.com/pisitkonkaew-Boy/NIMEX-Fleet-Hub/blob/main/ROLLOUT.md ตอบภาษาไทย
+
+ดูชื่อระบบและ repo ได้จากตารางท้ายไฟล์ แชทละ 1 repo เท่านั้น เพื่อไม่ให้โค้ดชนกัน
+
+---
+
+## คำสั่ง (สำหรับ Claude)
+
+ตอบเป็นภาษาไทยเสมอ
+
+**งาน:** เพิ่ม "ปุ่มแชร์/ส่งออกแบบเลือกหัวข้อ + อินโฟกราฟิก 16:9" ให้ระบบที่ผู้ใช้ระบุ
+- repo: `pisitkonkaew-Boy/<repo>` (ดูจากตารางท้ายไฟล์)
+- เว็บ: `https://pisitkonkaew-boy.github.io/<repo>/`
+
+**สกิล:** ใช้ `nimex-export-infographic-169` และใช้ `nimex-dashboard-upgrade` ด้วยถ้าหน้านั้นยังไม่เป็น NIMEX Design Kit
+
+**ต้นแบบที่ทำเสร็จแล้ว** (ดูโค้ดได้):
+- `NIMEX-Check-in-Performance-Dashboard`: share.js
+- `NIMEX-Fleet-Transport-Operator`: share.js ประกอบด้วยการ์ด 8 ตัว, กราฟ 4 ด้าน, Excel, PowerPoint, PNG ยาว และข้อความ LINE
+- `NIMEX-Delivery-Driver-Performance`
+
+### ขั้นตอน
+1. **อ่านโค้ด:** clone repo แล้วสรุปให้ผู้ใช้ว่ามี KPI อะไร คำนวณอย่างไร แบ่งมิติอะไร มีงวดก่อนหน้าหรือไม่
+2. **ถามผู้ใช้ก่อนเริ่ม** (ห้ามเดาสูตรหรือเกณฑ์):
+   - KPI หลักกี่ตัว ชื่ออะไร สูตรอะไร ตัวไหน "ต่ำ = ดี" และเกณฑ์เกรด A–F
+   - มิติที่ใช้แบ่ง (ภาค / DC / กลุ่ม / ชนิดรถ)
+   - เทียบกับช่วงก่อนหน้าอย่างไร
+   - กราฟ 4 ด้านในอินโฟกราฟิกจะใช้ตัวชี้วัดอะไร (เสนอตัวเลือกให้ผู้ใช้เลือก)
+3. **ทำ share.js เป็นไฟล์แยก**
+   - ปุ่มเห็นเฉพาะแอดมิน (`nx-admin-only`) และใช้ตัวกรองบนหน้าทั้งหมด
+   - สร้าง SVG 1920×1080 แล้วแปลงเป็น PNG ที่ scale 2 ฝังฟอนต์ Prompt และโลโก้ ห้ามใช้ html2canvas
+   - ผลต่าง: ดี = เขียว, แย่ = แดง ถ้าไม่มีช่วงก่อนหน้าให้เขียน "ไม่มีช่วงก่อนหน้า"
+   - กลุ่มที่มีจำนวนน้อยให้แสดงจำนวนกำกับ
+   - กราฟที่ค่าอยู่ช่วงแคบ ให้แกนไม่เริ่มที่ 0 และเขียนกำกับไว้
+   - เพิ่มเลข `?v=` ของทุกไฟล์ที่แก้
+4. **ทดสอบด้วย Playwright**
+   - กดส่งออกครบ 4 แบบ เปิดดูรูปและไฟล์จริง ต้องไม่มี error
+   - ตรวจตัวเลขซ้ำด้วย Python แยกต่างหาก ต้องตรงกับหน้าเว็บ
+5. **ก่อน push:** `git fetch` ดูก่อนว่ามี commit จากแชทอื่นไหม แล้วค่อย push ขึ้น main
+6. **ตรวจเว็บจริงหลัง GitHub Pages อัปเดต** แล้วรายงานผู้ใช้เป็นภาษาไทย:
+   - อะไรเปลี่ยน
+   - ทดสอบอะไรไปแล้ว พร้อมตัวเลขสำคัญ
+   - อะไรยังไม่ได้ทดสอบบนเว็บจริง
+   - ผู้ใช้ต้องทำอะไรต่อ เช่น กด Ctrl+F5
+
+### กฎเหล็ก
+- ห้ามเปลี่ยนการคำนวณเดิมโดยไม่ถามผู้ใช้
+- ห้ามถามหรือพิมพ์รหัสผู้ดูแล ผู้ใช้ล็อกอินเอง
+- repo เป็นสาธารณะ ห้ามมีข้อมูลจริง ไฟล์ seed ชื่อคน เบอร์โทร หรือเลขบัญชี
+- ถ้าต้องแก้ Code.gs ต้อง Deploy ใหม่: Manage deployments → ✏️ → เวอร์ชันใหม่ (ลิงก์ /exec เดิม)
+- ทำทีละขั้น เรื่องที่ต้องตัดสินใจให้รายงานแล้วรอผู้ใช้ยืนยันก่อน
+
+---
+
+## ระบบที่เหลือ
+
+| ระบบ | repo | หมายเหตุ |
+|---|---|---|
+| Fleet Vehicle | NIMEX-Fleet-vehicle-dashboard | เคยมีอีกแชทแก้อยู่ เช็กใน repo ก่อนว่าทำไปถึงไหน |
+| Check-in Daily | NIMEX-Check-In-Daily-Dashboard | ข้อมูลยังเก็บในเบราว์เซอร์ (localStorage) ถามก่อนว่าจะย้ายขึ้น Sheet ไหม |
+| Fleet Planning Catalog | NIMEX-Fleet_Planning_Catalog | ข้อมูลและรูปรถเก็บในเบราว์เซอร์ อาจไม่เหมาะกับอินโฟกราฟิก KPI ถามก่อน |
+| Fleet Performance | NIMEX-Fleet-Performance | ใช้ Sheet อยู่แล้ว |
+| Pickup Vehicle | NIMEX-Pickup-Vehicle-Dashboard | ใช้ Sheet อยู่แล้ว |
+| Inbound Cost | NIMEX-Inbound-Cost-Dashboard | ใช้ Sheet อยู่แล้ว |
+| Vehicle P&L | NIMEX-Vehicle-P-L-Dashboard | ใช้ Sheet อยู่แล้ว |
+| Car Performance | NIMEX-Car-Performance-Dashboard | ใช้ Sheet อยู่แล้ว |
+| Fleet Card | NIMEX-Fleet-Card-Dashboard | ใช้ Sheet อยู่แล้ว แต่ยังเป็นไฟล์เดียว 1.3 MB |
+
+**ทำเสร็จแล้ว:** Check-in Performance, Fleet Transport Operator, Delivery Driver Performance
