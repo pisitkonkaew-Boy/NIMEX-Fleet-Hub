@@ -63,11 +63,10 @@
 | Fleet Vehicle | NIMEX-Fleet-vehicle-dashboard | เคยมีอีกแชทแก้อยู่ เช็กใน repo ก่อนว่าทำไปถึงไหน |
 | Check-in Daily | NIMEX-Check-In-Daily-Dashboard | ข้อมูลยังเก็บในเบราว์เซอร์ (localStorage) ถามก่อนว่าจะย้ายขึ้น Sheet ไหม |
 | Fleet Planning Catalog | NIMEX-Fleet_Planning_Catalog | ข้อมูลและรูปรถเก็บในเบราว์เซอร์ อาจไม่เหมาะกับอินโฟกราฟิก KPI ถามก่อน |
-| Fleet Performance | NIMEX-Fleet-Performance | ใช้ Sheet อยู่แล้ว |
 | Pickup Vehicle | NIMEX-Pickup-Vehicle-Dashboard | ใช้ Sheet อยู่แล้ว |
 | Inbound Cost | NIMEX-Inbound-Cost-Dashboard | ใช้ Sheet อยู่แล้ว |
 | Vehicle P&L | NIMEX-Vehicle-P-L-Dashboard | ใช้ Sheet อยู่แล้ว |
 | Car Performance | NIMEX-Car-Performance-Dashboard | ใช้ Sheet อยู่แล้ว |
 | Fleet Card | NIMEX-Fleet-Card-Dashboard | ใช้ Sheet อยู่แล้ว แต่ยังเป็นไฟล์เดียว 1.3 MB |
 
-**ทำเสร็จแล้ว:** Check-in Performance, Fleet Transport Operator, Delivery Driver Performance
+**ทำเสร็จแล้ว:** Check-in Performance, Fleet Transport Operator, Delivery Driver Performance, Fleet Performance (share.js: อินโฟกราฟิก 16:9 ตั้งค่าการ์ด/กราฟ 4 ช่อง/เกรด A–F ได้ + ดีสุด/แย่สุดทุกตัวชี้วัด)
