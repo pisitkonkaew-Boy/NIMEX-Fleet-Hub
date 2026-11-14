@@ -56,16 +56,11 @@
 
 ---
 
-## ระบบที่เหลือ
+## ระบบที่เหลือ (อัปเดต 14 พ.ย. 2569)
 
 | ระบบ | repo | หมายเหตุ |
 |---|---|---|
-| Fleet Vehicle | NIMEX-Fleet-vehicle-dashboard | เคยมีอีกแชทแก้อยู่ เช็กใน repo ก่อนว่าทำไปถึงไหน |
-| Check-in Daily | NIMEX-Check-In-Daily-Dashboard | ข้อมูลยังเก็บในเบราว์เซอร์ (localStorage) ถามก่อนว่าจะย้ายขึ้น Sheet ไหม |
-| Fleet Planning Catalog | NIMEX-Fleet_Planning_Catalog | ข้อมูลและรูปรถเก็บในเบราว์เซอร์ อาจไม่เหมาะกับอินโฟกราฟิก KPI ถามก่อน |
-| Pickup Vehicle | NIMEX-Pickup-Vehicle-Dashboard | ใช้ Sheet อยู่แล้ว |
-| Inbound Cost | NIMEX-Inbound-Cost-Dashboard | ใช้ Sheet อยู่แล้ว |
-| Vehicle P&L | NIMEX-Vehicle-P-L-Dashboard | ใช้ Sheet อยู่แล้ว |
-| Fleet Card | NIMEX-Fleet-Card-Dashboard | ใช้ Sheet อยู่แล้ว แต่ยังเป็นไฟล์เดียว 1.3 MB |
+| Check-in Daily | NIMEX-Check-In-Daily-Dashboard | ยังไม่มีปุ่มแชร์/อินโฟกราฟิกเลย ข้อมูลยังเก็บในเบราว์เซอร์ (localStorage) ถามผู้ใช้ก่อนว่าจะย้ายขึ้น Google Sheet + Apps Script ไหม |
+| Pickup Vehicle | NIMEX-Pickup-Vehicle-Dashboard | มีปุ่มส่งออกแบบเก่าใน app.js (อินโฟกราฟิกแนวตั้ง A4) ต้องปรับเป็น 16:9 ตามสกิล และเพิ่มหัวข้อดีสุด/แย่สุด แยกเป็น share.js |
 
-**ทำเสร็จแล้ว:** Check-in Performance, Fleet Transport Operator, Delivery Driver Performance, Fleet Performance (share.js: อินโฟกราฟิก 16:9 ตั้งค่าการ์ด/กราฟ 4 ช่อง/เกรด A–F ได้ + ดีสุด/แย่สุดทุกตัวชี้วัด), Car Performance (share.js: อินโฟกราฟิก 16:9 เลือกกราฟ 4 ช่องได้ 9 แบบ + ดีสุด/แย่สุด 7 ตัวชี้วัด)
+**ทำเสร็จแล้ว (10 ระบบ):** Fleet Transport Operator, Check-in Performance, Delivery Driver Performance, Fleet Vehicle, Fleet Performance, Fleet Planning Catalog, Inbound Cost, Vehicle P&L, Car Performance, Fleet Card
