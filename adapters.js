@@ -76,7 +76,7 @@
       return call(w, { ms: ms }, 'return ensureMonths(A.ms);');
     },
     metrics: {
-      pa: { name: 'อัตราเที่ยววิ่งตาม PA (แผนเที่ยววิ่ง)', unit: '%', dir: 1, note: 'เที่ยวที่ปล่อยจริง ÷ รถตามแผน (วันกำหนดส่ง ÷ PA) × 100' },
+      pa: { name: 'อัตราเที่ยววิ่งตาม PA (แผนเที่ยววิ่ง)', unit: '%', dir: -1, note: 'เที่ยวที่ปล่อยจริง ÷ รถตามแผน (วันกำหนดส่ง ÷ PA) × 100' },
       eff: { name: 'ประสิทธิภาพการจัดส่ง', unit: '%', dir: 1 }
     },
     calc: function (w, key, a, b) {
@@ -149,7 +149,7 @@
     }
   };
 
-  /* ---------- Fleet Transport Operator: KPI ต่องวด (ครึ่งเดือน) · รายเดือน = เฉลี่ยงวดในเดือน ---------- */
+  /* ---------- Fleet Transport Operator: รายเดือนคิดจากผลรวมทั้งเดือน (KPI ที่กรอกเอง = เฉลี่ยงวด) ---------- */
   A.operator = {
     repo: 'NIMEX-Fleet-Transport-Operator',
     ready: function (w) { var P = w.ftoPeriod; return !!(P && P.keys && P.keys.length && P.kval); },
@@ -162,14 +162,27 @@
     calc: function (w, key, a, b) {
       var P = w.ftoPeriod, kp = (P.cfg.kpis || []).filter(function (k) { return k.id === key; })[0]; if (!kp) return null;
       var ks = P.keys.filter(function (k) { var e = iso(P.periodEnd(k)); return e >= a && e <= b; });
-      var vs = ks.map(function (k) { return P.kval(kp, k); }).filter(function (v) { return isFinite(v); });
-      if (!vs.length) return null;
-      var dc = [];
-      if (kp.src === 'net_ge') {
-        var by = {}; ks.forEach(function (k) { P.units(k).forEach(function (u) { var o = by[u.dc] = by[u.dc] || { y: 0, n: 0 }; o.n++; if (u.net >= kp.param) o.y++; }); });
-        dc = Object.keys(by).map(function (n) { return [n, by[n].y / by[n].n * 100, by[n].n]; });
+      if (!ks.length) return null;
+      if (kp.src !== 'net_ge') {   /* KPI ที่ผู้ดูแลกรอกเอง: เฉลี่ยงวดที่มีค่า */
+        var vs = ks.map(function (k) { return P.kval(kp, k); }).filter(function (v) { return isFinite(v); });
+        return vs.length ? { v: vs.reduce(function (s, v) { return s + v; }, 0) / vs.length, region: [], dc: [], note: vs.length > 1 ? 'เฉลี่ย ' + vs.length + ' งวด' : '' } : null;
       }
-      return { v: vs.reduce(function (s, v) { return s + v; }, 0) / vs.length, region: [], dc: dc, note: ks.length > 1 ? 'เฉลี่ย ' + ks.length + ' งวด' : '' };
+      /* คิดจากผลรวมทั้งเดือน: ข้อมูลเดือน (รวมทะเบียน+DC ซ้ำ ตามสูตรเดิมของหน้า) แล้วนับรถที่คงเหลือสุทธิ ≥ เกณฑ์ */
+      var SUM = ['revenue', 'adj_revenue', 'total_revenue', 'daily_expense', 'bal_after_daily', 'period_expense', 'bal_after_period', 'adj_expense', 'bal_after_adj', 'rental', 'bal_after_rental', 'tax', 'carry_over', 'net_balance'];
+      var seen = {}, units = [];
+      ks.forEach(function (k) {
+        var m = k.slice(0, 7); if (seen[m]) return; seen[m] = 1;
+        var rows = P.dataset(k, 'month', 'all');
+        if (P.cfg.dropZero) rows = rows.filter(function (r) { return SUM.some(function (f) { return r[f]; }); });
+        if (P.cfg.unit === 'plate') {
+          var by = {}; rows.forEach(function (r) { var p = String(r.plate || '').replace(/[\s\-]/g, ''), x = by[p]; if (!x) x = by[p] = { dc: r.dc_name, net: 0, rev: -Infinity }; x.net += r.net_balance; if (r.total_revenue > x.rev) { x.rev = r.total_revenue; x.dc = r.dc_name; } });
+          Object.keys(by).forEach(function (p) { units.push(by[p]); });
+        } else rows.forEach(function (r) { units.push({ dc: r.dc_name, net: r.net_balance }); });
+      });
+      if (!units.length) return null;
+      var y = units.filter(function (u) { return u.net >= kp.param; }).length, g = {};
+      units.forEach(function (u) { var o = g[u.dc] = g[u.dc] || { y: 0, n: 0 }; o.n++; if (u.net >= kp.param) o.y++; });
+      return { v: y / units.length * 100, n: [y, units.length], region: [], dc: Object.keys(g).map(function (n) { return [n, g[n].y / g[n].n * 100, g[n].n]; }), note: 'ผลรวมทั้งเดือน · คงเหลือสุทธิ ≥ ' + Number(kp.param).toLocaleString('en-US') + ' บาท' };
     }
   };
 
