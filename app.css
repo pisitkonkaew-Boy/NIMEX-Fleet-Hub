@@ -268,8 +268,7 @@ svg.i{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-widt
 .rep-line{margin-top:16px;display:flex;flex-direction:column;gap:8px}
 .rep-line textarea{width:100%;font:inherit;font-size:13.5px;border:1px solid var(--line2);border-radius:12px;padding:10px;background:var(--panel);color:var(--ink)}
 .rep-show{position:fixed;inset:0;z-index:70;background:#000;display:flex;align-items:center;justify-content:center}
-.rep-show img{max-width:100vw;max-height:100vh;object-fit:contain;cursor:pointer}
-.rep-show.story img{max-height:100vh}
+.rep-show img{width:100vw;height:100vh;object-fit:contain;cursor:pointer;display:block}
 .rep-nav{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:8px;align-items:center;background:rgba(0,0,0,.55);color:#fff;border-radius:999px;padding:4px 10px;font-size:13px;opacity:.25;transition:opacity .2s}
 .rep-show:hover .rep-nav{opacity:1}
 .rep-nav button{border:0;background:rgba(255,255,255,.15);color:#fff;border-radius:50%;width:34px;height:34px;font-size:18px}
