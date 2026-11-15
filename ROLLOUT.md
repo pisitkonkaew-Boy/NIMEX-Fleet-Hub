@@ -56,11 +56,8 @@
 
 ---
 
-## ระบบที่เหลือ (อัปเดต 14 พ.ย. 2569)
+## สถานะ (15 พ.ย. 2569): ครบทั้ง 12 ระบบแล้ว ✅
 
-| ระบบ | repo | หมายเหตุ |
-|---|---|---|
-| Check-in Daily | NIMEX-Check-In-Daily-Dashboard | ยังไม่มีปุ่มแชร์/อินโฟกราฟิกเลย ข้อมูลยังเก็บในเบราว์เซอร์ (localStorage) ถามผู้ใช้ก่อนว่าจะย้ายขึ้น Google Sheet + Apps Script ไหม |
-| Pickup Vehicle | NIMEX-Pickup-Vehicle-Dashboard | มีปุ่มส่งออกแบบเก่าใน app.js (อินโฟกราฟิกแนวตั้ง A4) ต้องปรับเป็น 16:9 ตามสกิล และเพิ่มหัวข้อดีสุด/แย่สุด แยกเป็น share.js |
+Fleet Transport Operator, Check-in Performance, Check-in Daily, Delivery Driver Performance, Fleet Vehicle, Pickup Vehicle, Fleet Performance, Fleet Planning Catalog, Inbound Cost, Vehicle P&L, Car Performance, Fleet Card
 
-**ทำเสร็จแล้ว (10 ระบบ):** Fleet Transport Operator, Check-in Performance, Delivery Driver Performance, Fleet Vehicle, Fleet Performance, Fleet Planning Catalog, Inbound Cost, Vehicle P&L, Car Performance, Fleet Card
+ถ้าจะเพิ่มระบบใหม่ ให้ใช้คำสั่งในไฟล์นี้ได้เหมือนเดิม
