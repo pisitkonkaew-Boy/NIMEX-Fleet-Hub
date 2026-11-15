@@ -3,18 +3,29 @@
    Deploy > New deployment > Web app > Execute as: Me · Who has access: Anyone → คัดลอก URL /exec ใส่ HUB_API ใน config.js
    แท็บ Settings และ Log สร้างให้อัตโนมัติ */
 var ALLOWED = { style: ['a', 'b'] };
-var GROUPS = ['fleet', 'cost'];
-var ICONS = ['truck','route','user','coin','chart','gauge','fuel','clock','grid','map','box','wrench','doc'];
+var GID = /^[a-z0-9-]{1,20}$/, SID = /^[a-z0-9-]{1,30}$/;
+var ICONS = ['truck','route','user','coin','chart','gauge','fuel','clock','grid','map','box','wrench','doc'];  /* v5 */
 function str_(x, max) { return typeof x === 'string' && x.length <= max; }
-/* hidden = id ระบบที่ซ่อนจากผู้ชม · extra = ลิงก์ระบบที่ผู้ดูแลเพิ่มเอง · slotHide = จำนวนช่องว่างที่ซ่อนต่อหมวด */
+/* v5 · hidden = id ระบบที่ซ่อนจากผู้ชม · extra = ลิงก์ระบบที่ผู้ดูแลเพิ่มเอง · slotHide = จำนวนช่องว่างที่ซ่อนต่อกลุ่ม
+   groups = กลุ่ม (Daily / Monthly / …) พร้อมจำนวนแถว · layout = ลำดับระบบในแต่ละกลุ่ม · kpis = ตาราง KPI ของศูนย์รายงาน */
 function valid_(k, v) {
   if (k === 'hidden') return Array.isArray(v) && v.length <= 60 && v.every(function (x) { return typeof x === 'string' && /^[a-z0-9-]{1,30}$/.test(x); });
   if (k === 'extra') return Array.isArray(v) && v.length <= 30 && v.every(function (s) {
-    return s && /^x-[a-z0-9]{1,20}$/.test(s.id) && GROUPS.indexOf(s.group) >= 0 && ICONS.indexOf(s.icon) >= 0 &&
+    return s && /^x-[a-z0-9]{1,20}$/.test(s.id) && GID.test(s.group) && ICONS.indexOf(s.icon) >= 0 &&
       str_(s.name, 60) && s.name.length > 0 && str_(s.th, 60) && str_(s.desc, 200) && str_(s.url, 300) && /^https:\/\/[^\s"'<>]+$/.test(s.url);
   });
   if (k === 'slotHide') return v && typeof v === 'object' && !Array.isArray(v) && Object.keys(v).every(function (g) {
-    return GROUPS.indexOf(g) >= 0 && v[g] === Math.floor(v[g]) && v[g] >= 0 && v[g] <= 9;
+    return GID.test(g) && v[g] === Math.floor(v[g]) && v[g] >= 0 && v[g] <= 30;
+  });
+  if (k === 'groups') return Array.isArray(v) && v.length >= 1 && v.length <= 10 && v.every(function (g) {
+    return g && GID.test(g.id) && str_(g.name, 60) && g.name.length > 0 && str_(g.short, 30) && ICONS.indexOf(g.icon) >= 0 && g.rows === Math.floor(g.rows) && g.rows >= 1 && g.rows <= 10;
+  });
+  if (k === 'layout') return v && typeof v === 'object' && !Array.isArray(v) && Object.keys(v).length <= 10 && Object.keys(v).every(function (g) {
+    return GID.test(g) && Array.isArray(v[g]) && v[g].length <= 60 && v[g].every(function (x) { return typeof x === 'string' && SID.test(x); });
+  });
+  if (k === 'kpis') return Array.isArray(v) && v.length <= 80 && JSON.stringify(v).length <= 40000 && v.every(function (x) {
+    return x && str_(x.id, 30) && str_(x.dim, 40) && str_(x.sys, 30) && str_(x.key, 30) && str_(x.name, 80) && /^[DWM]{1,3}$/.test(x.modes) &&
+      ['%', 'baht', 'min', 'num'].indexOf(x.unit) >= 0 && (x.dir === 1 || x.dir === -1) && (x.target === null || typeof x.target === 'number') && typeof x.on === 'boolean';
   });
   return !!ALLOWED[k] && ALLOWED[k].indexOf(v) >= 0;
 }
