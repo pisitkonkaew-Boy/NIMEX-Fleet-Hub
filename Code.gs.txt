@@ -4,7 +4,10 @@
    แท็บ Settings และ Log สร้างให้อัตโนมัติ */
 var ALLOWED = { style: ['a', 'b'] };
 var GID = /^[a-z0-9-]{1,20}$/, SID = /^[a-z0-9-]{1,30}$/;
-var ICONS = ['truck','route','user','coin','chart','gauge','fuel','clock','grid','map','box','wrench','doc'];  /* v5 */
+var ICONS = ['truck','route','user','coin','chart','gauge','fuel','clock','grid','map','box','wrench','doc'];  /* v6 */
+/* v6 · ค่าเฉพาะผู้ดูแล (Action Plan) เก็บในแท็บ Private ไม่ส่งให้ผู้ชม: actions = งานแก้ไข · owners = รายชื่อผู้รับผิดชอบ · playbook = คลังแนวทางต่อ KPI */
+var PRIVATE = ['actions', 'owners', 'playbook'];
+var DATE = /^\d{4}-\d{2}-\d{2}$/;
 function str_(x, max) { return typeof x === 'string' && x.length <= max; }
 /* v5 · hidden = id ระบบที่ซ่อนจากผู้ชม · extra = ลิงก์ระบบที่ผู้ดูแลเพิ่มเอง · slotHide = จำนวนช่องว่างที่ซ่อนต่อกลุ่ม
    groups = กลุ่ม (Daily / Monthly / …) พร้อมจำนวนแถว · layout = ลำดับระบบในแต่ละกลุ่ม · kpis = ตาราง KPI ของศูนย์รายงาน */
@@ -23,6 +26,15 @@ function valid_(k, v) {
   if (k === 'layout') return v && typeof v === 'object' && !Array.isArray(v) && Object.keys(v).length <= 10 && Object.keys(v).every(function (g) {
     return GID.test(g) && Array.isArray(v[g]) && v[g].length <= 60 && v[g].every(function (x) { return typeof x === 'string' && SID.test(x); });
   });
+  if (k === 'actions') return Array.isArray(v) && v.length <= 150 && JSON.stringify(v).length <= 45000 && v.every(function (a) {
+    return a && str_(a.id, 30) && str_(a.kpi, 30) && str_(a.kname, 80) && str_(a.prob, 200) && str_(a.title, 160) && a.title.length > 0 && str_(a.owner, 40) &&
+      str_(a.scope, 120) && ['w', 'm', 'n', 'c'].indexOf(a.hz) >= 0 && DATE.test(a.start) && DATE.test(a.due) && ['todo', 'doing', 'done'].indexOf(a.status) >= 0 &&
+      a.pct === Math.floor(a.pct) && a.pct >= 0 && a.pct <= 100 && DATE.test(a.created) && (a.base === null || typeof a.base === 'number') && str_(a.unit, 10);
+  });
+  if (k === 'owners') return Array.isArray(v) && v.length >= 1 && v.length <= 30 && v.every(function (x) { return str_(x, 40) && x.length > 0; });
+  if (k === 'playbook') return v && typeof v === 'object' && !Array.isArray(v) && Object.keys(v).length <= 80 && JSON.stringify(v).length <= 45000 && Object.keys(v).every(function (id) {
+    return str_(id, 30) && Array.isArray(v[id]) && v[id].length <= 12 && v[id].every(function (x) { return x && str_(x.t, 160) && x.t.length > 0 && str_(x.o, 40); });
+  });
   if (k === 'kpis') return Array.isArray(v) && v.length <= 80 && JSON.stringify(v).length <= 40000 && v.every(function (x) {
     return x && str_(x.id, 30) && str_(x.dim, 40) && str_(x.sys, 30) && str_(x.key, 30) && str_(x.name, 80) && /^[DWM]{1,3}$/.test(x.modes) &&
       ['%', 'baht', 'min', 'num'].indexOf(x.unit) >= 0 && (x.dir === 1 || x.dir === -1) && (x.target === null || typeof x.target === 'number') && typeof x.on === 'boolean';
@@ -35,15 +47,15 @@ function tab_(name, head) {
   if (!t) { t = ss.insertSheet(name); t.appendRow(head); t.setFrozenRows(1); }
   return t;
 }
-function readSettings_() {
-  var t = tab_('Settings', ['key', 'value']), n = t.getLastRow(), o = {};
+function readSettings_(tab) {
+  var t = tab_(tab || 'Settings', ['key', 'value']), n = t.getLastRow(), o = {};
   if (n > 1) t.getRange(2, 1, n - 1, 2).getValues().forEach(function (r) {
     if (r[0] !== '') { try { o[String(r[0])] = JSON.parse(r[1]); } catch (e) { o[String(r[0])] = r[1]; } }
   });
   return o;
 }
-function writeSettings_(o) {
-  var t = tab_('Settings', ['key', 'value']), n = t.getLastRow();
+function writeSettings_(o, tab) {
+  var t = tab_(tab || 'Settings', ['key', 'value']), n = t.getLastRow();
   if (n > 1) t.getRange(2, 1, n - 1, 2).clearContent();
   var rows = Object.keys(o).map(function (k) { return [k, JSON.stringify(o[k])]; });
   if (rows.length) { t.getRange(2, 1, rows.length, 2).setNumberFormat('@'); t.getRange(2, 1, rows.length, 2).setValues(rows); }
@@ -63,17 +75,19 @@ function doPost(e) {
   if (!key) return json_({ ok: false, error: 'admin_key_not_set' });
   if (!b.key || b.key !== key) { Utilities.sleep(1200); return json_({ ok: false, error: 'denied' }); }
   if (b.a === 'auth') return json_({ ok: true });
+  if (b.a === 'private') return json_({ ok: true, settings: readSettings_('Private') });
   if (b.a === 'settings') {
     var lock = LockService.getScriptLock();
     if (!lock.tryLock(20000)) return json_({ ok: false, error: 'busy' });
     try {
-      var cur = readSettings_(), inc = b.settings || {};
+      var cur = readSettings_(), prv = readSettings_('Private'), inc = b.settings || {}, pubChanged = false, prvChanged = false;
       for (var k in inc) {
         if (!valid_(k, inc[k])) return json_({ ok: false, error: 'bad_value', key: k });
-        cur[k] = inc[k];
+        if (PRIVATE.indexOf(k) >= 0) { prv[k] = inc[k]; prvChanged = true; } else { cur[k] = inc[k]; pubChanged = true; }
       }
-      writeSettings_(cur);
-      tab_('Log', ['time', 'action', 'detail']).appendRow([new Date(), 'settings', JSON.stringify(inc)]);
+      if (pubChanged) writeSettings_(cur);
+      if (prvChanged) writeSettings_(prv, 'Private');
+      tab_('Log', ['time', 'action', 'detail']).appendRow([new Date(), 'settings', Object.keys(inc).join(', ')]);
       CacheService.getScriptCache().remove('hub');
       return json_({ ok: true, settings: cur });
     } finally { lock.releaseLock(); }

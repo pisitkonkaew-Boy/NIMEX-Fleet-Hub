@@ -279,3 +279,16 @@ svg.i{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-widt
 .rep-t input,.rep-t select{font:inherit;font-size:12.5px;border:1px solid var(--line2);border-radius:8px;padding:4px 6px;background:var(--panel);color:var(--ink);max-width:100%}
 .rep-t input[data-f="name"]{min-width:240px}.rep-t select{display:block;margin-bottom:3px;max-width:220px}
 .rep-t .nw{white-space:nowrap}.rep-t label{font-size:12px}
+/* v8 Action Plan */
+.ap-opt{border-top:1px solid var(--line);margin-top:10px;padding-top:10px}
+.ap-fmt{margin:6px 0 0 24px}.ap-fmt button{padding:5px 12px;font-size:12.5px}
+.rep-ap{margin-top:18px;border-top:2px solid var(--gold-l);padding-top:12px}
+.rep-ap h3{font-size:15px;margin:10px 0 8px}.rep-ap h3 small{font-weight:400;color:var(--muted);font-size:12.5px}
+.ap-p{border:1px solid var(--line);border-radius:12px;margin:0 0 12px;padding:8px 12px 12px}
+.ap-p legend{font-weight:600;font-size:14px;padding:0 4px}.ap-p .bad,.rep-ap .bad{color:var(--bad)}
+.ap-an{font-size:12.5px;color:var(--muted);margin:2px 0 8px;line-height:1.6}
+.ap-row{display:grid;grid-template-columns:20px minmax(220px,1fr) 150px 110px 132px 132px;gap:6px;align-items:center;margin:4px 0}
+.ap-row input,.ap-row select,.rep-apset textarea{font:inherit;font-size:12.5px;border:1px solid var(--line2);border-radius:8px;padding:4px 6px;background:var(--panel);color:var(--ink);min-width:0}
+@media (max-width:900px){.ap-row{grid-template-columns:20px 1fr 1fr}}
+.rep-apset{margin-top:22px;border-top:2px solid var(--gold-l);padding-top:10px;display:flex;flex-direction:column;gap:6px}
+.rep-apset textarea{width:100%}
