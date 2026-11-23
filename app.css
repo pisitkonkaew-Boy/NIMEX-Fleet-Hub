@@ -301,3 +301,10 @@ svg.i{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-widt
 .th-opt>span{font-size:13px;color:var(--muted)}
 .th-opt .seg{flex-wrap:wrap}
 .th-opt small{display:block;width:100%;font-size:12px;color:var(--muted)}
+
+/* v11 Action Plan clear */
+.ap-clear{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:4px 0 10px}
+.ap-clear>span{font-size:13px;color:var(--muted);margin-right:4px}
+.btn.sm{padding:4px 10px;font-size:12px}
+.btn.danger{border:1px solid #d93b3b;background:transparent;color:#d93b3b}
+.btn.danger:hover{background:#d93b3b;color:#fff}
