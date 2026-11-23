@@ -295,3 +295,9 @@ svg.i{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-widt
 .ap-show{font-weight:400;font-size:12.5px;margin-left:10px;color:var(--muted);cursor:pointer}
 .ap-p.off{opacity:.6;background:var(--hover)}
 .rep-t tr.off td{opacity:.5}
+
+/* v10 theme selector */
+.th-opt{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:6px 0 10px}
+.th-opt>span{font-size:13px;color:var(--muted)}
+.th-opt .seg{flex-wrap:wrap}
+.th-opt small{display:block;width:100%;font-size:12px;color:var(--muted)}
