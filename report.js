@@ -464,9 +464,9 @@
 
   /* ================= UI ================= */
   var UI = ls(LSK) || {};
-  UI.mode = UI.mode || 'D'; UI.out = UI.out || { sum: 1, dim: 0, kpi: 0 }; UI.off = UI.off || {}; UI.apFmt = UI.apFmt || 'one';
+  UI.mode = UI.mode || 'D'; UI.out = UI.out || { sum: 1, dim: 0, kpi: 0 }; UI.off = UI.off || {}; UI.apFmt = UI.apFmt || 'one'; UI.apHide = UI.apHide || {}; UI.apHideAct = UI.apHideAct || {};
   var SLIDES = [], LAST = null;
-  function saveUI() { ls(LSK, { mode: UI.mode, out: UI.out, off: UI.off, ap: UI.ap, apFmt: UI.apFmt }); }
+  function saveUI() { ls(LSK, { mode: UI.mode, out: UI.out, off: UI.off, ap: UI.ap, apFmt: UI.apFmt, apHide: UI.apHide, apHideAct: UI.apHideAct }); }
   function modeKpis(mode) { return kpis().filter(function (k) { return k.on !== false && String(k.modes || '').indexOf(mode) >= 0; }); }
   function picked() { return modeKpis(UI.mode).filter(function (k) { return !UI.off[k.id]; }); }
   function latestAll(mode) {
@@ -672,8 +672,14 @@
   }
   function severity(o) { var k = o.k; if (hasT(k)) return Math.abs(+k.target - o.v) / (Math.abs(+k.target) || 1); return o.pv ? Math.abs(o.d) / (Math.abs(o.pv) || 1) : 0; }
   function problems(res, p) { return res.filter(function (o) { return o.v != null && o.st < 0; }).sort(function (a, b) { return severity(b) - severity(a); }).map(function (o) { o.an = analyse(o, p); return o; }); }
+  /* ซ่อนในรายงานรอบนี้: จำตามช่วงรายงาน (รอบถัดไปจะแสดงกลับเอง) · ไม่ลบงาน ไม่กระทบผู้ดูแลเครื่องอื่น */
+  function curTag() { return LAST ? fileTag(LAST.p) : ''; }
+  function hiddenK(kid) { return !!UI.apHide && UI.apHide[kid] === curTag(); }
+  function hiddenA(id) { return !!UI.apHideAct && UI.apHideAct[id] === curTag(); }
+  function setHide(map, id, on) { var t = curTag(); Object.keys(map).forEach(function (k) { if (map[k] !== t) delete map[k]; }); if (on) map[id] = t; else delete map[id]; saveUI(); }
   function actsFor(kid) { return actions().filter(function (a) { return a.kpi === kid; }); }
-  function openActs() { var t30 = addD(today(), -30); return actions().filter(function (a) { return a.status !== 'done' || a.due >= t30; }); }
+  function shownActs(kid) { return actsFor(kid).filter(function (a) { return !hiddenA(a.id); }); }
+  function openActs() { var t30 = addD(today(), -30); return actions().filter(function (a) { return (a.status !== 'done' || a.due >= t30) && !hiddenK(a.kpi) && !hiddenA(a.id); }); }
 
   /* ---- slide: one problem per page ---- */
   function chipS(x, y, txt, col, w, size, op) { size = size || 15; w = w || txt.length * size * 0.62 + 26; return { s: '<rect x="' + x + '" y="' + y + '" width="' + w.toFixed(0) + '" height="' + (size + 14) + '" rx="' + (size + 14) / 2 + '" fill="' + col + '" fill-opacity="' + (op || 0.18) + '" stroke="' + col + '"/>' + T(x + w / 2, y + size + 2, txt, size, 700, col, 'middle'), w: w }; }
@@ -712,7 +718,7 @@
     s += '<rect x="' + (x1 + 22) + '" y="' + (y - 24) + '" width="' + (w1 - 44) + '" height="' + (top + ph - y + 8) + '" rx="12" fill="' + CY + '" fill-opacity=".07" stroke="' + CY + '" stroke-opacity=".45"/>';
     s += T(x1 + 40, y + 4, '🔎 ข้อวิเคราะห์ (ระบบสรุปจากตัวเลข)', 18, 800, CY);
     var ly2 = y + 38; (an.lines.length ? an.lines : ['ไม่มีข้อมูลแยกภาค/DC สำหรับวิเคราะห์']).forEach(function (l) { wrap('• ' + l, 16, w1 - 90, 2).forEach(function (t, j) { if (ly2 < top + ph - 10) s += T(x1 + 40 + (j ? 12 : 0), ly2, t, 16, 400, '#e8f1ff'); ly2 += 26; }); ly2 += 4; });
-    var x2 = xs[2], w2 = cw[2], acts = actsFor(k.id).filter(function (a) { return stOf(a) !== 'done' || a.created >= addD(today(), -30); }).slice(0, 4);
+    var x2 = xs[2], w2 = cw[2], acts = shownActs(k.id).filter(function (a) { return stOf(a) !== 'done' || a.created >= addD(today(), -30); }).slice(0, 4);
     s += stepT(x2 + 22, top + 40, 3, 'แนวทางแก้ไข');
     if (!acts.length) s += T(x2 + w2 / 2, top + 300, 'ยังไม่ได้กำหนดแนวทาง', 20, 600, MUT, 'middle') + T(x2 + w2 / 2, top + 332, 'เลือกได้ในศูนย์รายงาน › Action Plan', 16, 400, MUT, 'middle');
     acts.forEach(function (a, i) {
@@ -742,7 +748,7 @@
     s += '<line x1="' + (gx + 16) + '" y1="' + (gy + 58) + '" x2="' + (gx + gw - 16) + '" y2="' + (gy + 58) + '" stroke="' + YEL + '" stroke-opacity=".5"/>';
     var rh = (gh - 80) / Math.max(4, rows.length), y = gy + 66;
     rows.forEach(function (o, i) {
-      var k = o.k, an = o.an, n = page * 5 + i + 1, list = actsFor(k.id).filter(function (a) { return stOf(a) !== 'done'; }).slice(0, 2);
+      var k = o.k, an = o.an, n = page * 5 + i + 1, list = shownActs(k.id).filter(function (a) { return stOf(a) !== 'done'; }).slice(0, 2);
       if (i) s += '<line x1="' + (gx + 16) + '" y1="' + y + '" x2="' + (gx + gw - 16) + '" y2="' + y + '" stroke="#fff" stroke-opacity=".10"/>';
       s += '<circle cx="' + (gx + 40) + '" cy="' + (y + 34) + '" r="15" fill="' + RED + '"/>' + T(gx + 40, y + 40, String(n), 17, 800, '#fff', 'middle');
       s += T(gx + 66, y + 40, fit(k.name, 17, 290), 17, 700, SOFT) + T(gx + 66, y + 90, fmt(k, o.v), 38, 800, '#fff', 'start', 'filter="url(#tglow)"');
@@ -809,12 +815,12 @@
     return { svg: s + '</svg>', pages: pages };
   }
   function apSlides(A, res, p) {
-    var probs = problems(res, p), out = [], tag = fileTag(p);
+    var all = problems(res, p), probs = all.filter(function (o) { return !hiddenK(o.k.id); }), out = [], tag = fileTag(p);
     if (UI.apFmt === 'each') probs.forEach(function (o, i) { out.push({ name: tag + '_action' + (i + 1), t: 'Action Plan · ' + o.k.name, svg: svgApEach(A, probs, i, p), ap: 1 }); });
     else if (probs.length) { var pgs = Math.ceil(probs.length / 5); for (var i = 0; i < pgs; i++) out.push({ name: tag + '_action' + (pgs > 1 ? i + 1 : ''), t: 'Action Plan · สรุปรวม', svg: svgApOne(A, probs, p, i, pgs), ap: 1 }); }
     var t0 = svgTimeline(A, p, res, 0); out.push({ name: tag + '_timeline', t: 'ไทม์ไลน์การแก้ไข', svg: t0.svg || t0, ap: 1 });
     for (var j = 1; j < (t0.pages || 1); j++) out.push({ name: tag + '_timeline' + (j + 1), t: 'ไทม์ไลน์การแก้ไข ' + (j + 1), svg: svgTimeline(A, p, res, j).svg, ap: 1 });
-    return { slides: out, probs: probs };
+    return { slides: out, probs: all };
   }
   function apText() {
     var acts = openActs(); if (!acts.length) return '';
@@ -828,22 +834,25 @@
     var probs = LAST.probs || [], os = owners();
     var oSel = function (v) { return '<select data-a="owner">' + os.concat(os.indexOf(v) < 0 && v ? [v] : []).map(function (o) { return '<option' + (o === v ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join('') + '<option value="__new">+ พิมพ์ชื่ออื่น…</option></select>'; };
     var hSel = function (v) { return '<select data-a="hz">' + ['w', 'm', 'n', 'c'].map(function (h) { return '<option value="' + h + '"' + (h === v ? ' selected' : '') + '>' + HZ[h].t + '</option>'; }).join('') + '</select>'; };
-    var html = '<h3>Action Plan <small>ปัญหาจากผลที่เลือก ' + probs.length + ' เรื่อง · ติ๊กแนวทาง เลือกผู้รับผิดชอบและระยะเวลา แล้วกดบันทึก</small></h3>';
+    var nHid = probs.filter(function (o) { return hiddenK(o.k.id); }).length;
+    var html = '<h3>Action Plan <small>ปัญหาจากผลที่เลือก ' + probs.length + ' เรื่อง' + (nHid ? ' · ซ่อนในรอบนี้ ' + nHid : '') + ' · ติ๊กแนวทาง เลือกผู้รับผิดชอบและระยะเวลา แล้วกดบันทึก · เอาติ๊ก "แสดง" ออกถ้าไม่นำเสนอเรื่องนั้นในรอบนี้</small></h3>';
     if (!probs.length) html += '<p class="rep-note">ไม่มี KPI ที่ไม่ผ่านเกณฑ์หรือแย่ลงในผลที่เลือก</p>';
     probs.forEach(function (o, pi) {
-      var k = o.k, an = o.an, have = actsFor(k.id).filter(function (a) { return a.status !== 'done'; });
-      html += '<fieldset class="ap-p" data-p="' + pi + '"><legend>' + (pi + 1) + '. ' + esc(k.name) + ' <b class="bad">' + esc(fmt(k, o.v)) + '</b>' + (hasT(k) ? ' <small>เกณฑ์ ' + esc(fmtT(k)) + '</small>' : '') + '</legend>' +
+      var k = o.k, an = o.an, have = actsFor(k.id).filter(function (a) { return a.status !== 'done'; }), hid = hiddenK(k.id);
+      html += '<fieldset class="ap-p' + (hid ? ' off' : '') + '" data-p="' + pi + '"><legend>' + (pi + 1) + '. ' + esc(k.name) + ' <b class="bad">' + esc(fmt(k, o.v)) + '</b>' + (hasT(k) ? ' <small>เกณฑ์ ' + esc(fmtT(k)) + '</small>' : '') +
+        ' <label class="ap-show"><input type="checkbox" data-showk="' + esc(k.id) + '"' + (hid ? '' : ' checked') + '> แสดงในรายงานรอบนี้</label></legend>' +
+        (hid ? '<p class="rep-note">ซ่อนจากรายงาน ' + esc(label(LAST.p).replace(/\s+\(.*/, '')) + ' (สไลด์ ไทม์ไลน์ LINE และรูปแนวตั้ง) · รอบถัดไปจะแสดงกลับเอง · งานไม่ถูกลบ</p></fieldset>' : '') +
         '<p class="ap-an">' + (an.regs.length ? '<b>ภาคแย่สุด:</b> ' + esc(an.regs.map(function (r) { return r[0] + ' ' + fmt(k, r[1]); }).join(' · ')) + '<br>' : '') + (an.dcs.length ? '<b>DC แย่สุด 5:</b> ' + esc(an.dcs.map(function (d) { return d[0] + ' ' + fmt(k, d[1]); }).join(' · ')) + '<br>' : '') + an.lines.map(function (l) { return '🔎 ' + esc(l); }).join('<br>') + '</p>' +
-        (have.length ? '<p class="rep-note">มีงานค้างของ KPI นี้ ' + have.length + ' งาน (แก้สถานะได้ในตารางงานด้านล่าง)</p>' : '') +
+        (hid ? '' : (have.length ? '<p class="rep-note">มีงานค้างของ KPI นี้ ' + have.length + ' งาน (แก้สถานะได้ในตารางงานด้านล่าง)</p>' : '') +
         playbook(k.id).concat([{ t: '', o: os[0] }]).map(function (pbk, i) {
           var t = pbk.t.replace('{พื้นที่}', an.scope), exists = have.some(function (a) { return a.title === t; }), d = hzDates('w');
           return '<div class="ap-row" data-i="' + i + '"><input type="checkbox" data-a="on"' + (exists ? ' disabled title="มีงานนี้อยู่แล้ว"' : '') + '><input data-a="title" value="' + esc(t) + '" placeholder="พิมพ์แนวทางอื่น…" maxlength="160">' + oSel(pbk.o) + hSel('w') + '<input type="date" data-a="start" value="' + d[0] + '"><input type="date" data-a="due" value="' + d[1] + '"></div>';
-        }).join('') + '</fieldset>';
+        }).join('') + '</fieldset>');
     });
     var acts = actions().slice().sort(function (a, b) { return (a.status === 'done') - (b.status === 'done') || (a.due < b.due ? -1 : 1); });
     html += '<h3>งานแก้ไขทั้งหมด <small>' + acts.length + ' งาน · งานที่ยังไม่เสร็จยกไปรายงานรอบถัดไปเอง</small></h3>' +
-      (acts.length ? '<div class="rep-tw"><table class="rep-t"><thead><tr><th>งาน</th><th>KPI</th><th>ผู้รับผิดชอบ</th><th>ช่วง</th><th>สถานะ</th><th>%</th><th></th></tr></thead><tbody>' + acts.map(function (a) {
-        return '<tr data-id="' + esc(a.id) + '"><td><input data-e="title" value="' + esc(a.title) + '" maxlength="160" style="min-width:260px"></td><td>' + esc(a.kname) + '</td><td>' + esc(a.owner) + '</td><td class="nw"><input type="date" data-e="start" value="' + a.start + '"> – <input type="date" data-e="due" value="' + a.due + '"></td>' +
+      (acts.length ? '<div class="rep-tw"><table class="rep-t"><thead><tr><th title="แสดงในรายงานรอบนี้">แสดง</th><th>งาน</th><th>KPI</th><th>ผู้รับผิดชอบ</th><th>ช่วง</th><th>สถานะ</th><th>%</th><th></th></tr></thead><tbody>' + acts.map(function (a) {
+        return '<tr data-id="' + esc(a.id) + '"' + (hiddenA(a.id) || hiddenK(a.kpi) ? ' class="off"' : '') + '><td><input type="checkbox" data-showa="' + esc(a.id) + '"' + (hiddenA(a.id) ? '' : ' checked') + (hiddenK(a.kpi) ? ' disabled title="KPI นี้ถูกซ่อนในรอบนี้"' : '') + ' aria-label="แสดงในรายงานรอบนี้"></td><td><input data-e="title" value="' + esc(a.title) + '" maxlength="160" style="min-width:260px"></td><td>' + esc(a.kname) + '</td><td>' + esc(a.owner) + '</td><td class="nw"><input type="date" data-e="start" value="' + a.start + '"> – <input type="date" data-e="due" value="' + a.due + '"></td>' +
           '<td><select data-e="status">' + ['todo', 'doing', 'done'].map(function (s) { return '<option value="' + s + '"' + (a.status === s ? ' selected' : '') + '>' + STT[s].t + '</option>'; }).join('') + '</select>' + (stOf(a) === 'late' ? ' <b class="bad">ล่าช้า</b>' : '') + '</td>' +
           '<td><input type="number" min="0" max="100" step="5" data-e="pct" value="' + (a.pct || 0) + '" style="width:64px"></td><td><button type="button" class="act" data-del="' + esc(a.id) + '" title="ลบ">✕</button></td></tr>';
       }).join('') + '</tbody></table></div>' : '<p class="rep-note">ยังไม่มีงาน</p>') +
@@ -852,6 +861,8 @@
     [].forEach.call(el.querySelectorAll('select[data-a="owner"]'), function (sel) { sel.onchange = function () { if (sel.value !== '__new') return; var v = (prompt('ชื่อผู้รับผิดชอบ') || '').trim().slice(0, 40); if (!v) { sel.selectedIndex = 0; return; } var op = document.createElement('option'); op.textContent = v; op.selected = true; sel.insertBefore(op, sel.lastChild); }; });
     [].forEach.call(el.querySelectorAll('select[data-a="hz"]'), function (sel) { sel.onchange = function () { if (sel.value === 'c') return; var r = sel.closest('.ap-row'), d = hzDates(sel.value); r.querySelector('[data-a="start"]').value = d[0]; r.querySelector('[data-a="due"]').value = d[1]; }; });
     [].forEach.call(el.querySelectorAll('.ap-row input[data-a="title"]'), function (inp) { inp.oninput = function () { var c = inp.parentNode.querySelector('[data-a="on"]'); if (inp.value.trim() && !c.disabled) c.checked = true; }; });
+    [].forEach.call(el.querySelectorAll('[data-showk]'), function (c) { c.onchange = function () { setHide(UI.apHide, c.dataset.showk, !c.checked); rebuildAp(); }; });
+    [].forEach.call(el.querySelectorAll('[data-showa]'), function (c) { c.onchange = function () { setHide(UI.apHideAct, c.dataset.showa, !c.checked); rebuildAp(); }; });
     [].forEach.call(el.querySelectorAll('[data-del]'), function (b) { b.onclick = function () { if (!confirm('ลบงานนี้?')) return; saveActions(actions().filter(function (a) { return a.id !== b.dataset.del; }), 'ลบงานแล้ว').then(rebuildAp); }; });
     $('apSave').onclick = function () {
       var list = clone(actions()), now = today(), added = 0;

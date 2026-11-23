@@ -1,7 +1,7 @@
 /* NIMEX Fleet Hub — ทะเบียนระบบ
    เพิ่ม/ลบระบบได้ที่นี่ แล้วเพิ่มเลข HUB_V เพื่อล้างแคชผู้ชม
    ลำดับ ย้ายกลุ่ม ซ่อน/แสดง ชื่อกลุ่ม และจำนวนแถว ผู้ดูแลปรับเองได้ในโหมด #admin (ค่าที่บันทึกใน Sheet ของ Hub จะใช้แทนค่าในไฟล์นี้) */
-window.HUB_V = 8;
+window.HUB_V = 9;
 /* Apps Script ของ Hub (ลงท้าย /exec) ใช้เก็บค่าที่ผู้ดูแลตั้งให้ผู้ชมทุกคนเห็นเหมือนกัน */
 window.HUB_API = 'https://script.google.com/macros/s/AKfycbxQuPWvrty_9puGb3yPXoY6AlAlPNmAdW-ddAN-3lHIy8CCjJqDZcJhwx1b9fveZwlg/exec';
 window.HUB_STYLE = 'a';   /* หน้าตาเริ่มต้น: a = Navy Classic, b = Command Night */

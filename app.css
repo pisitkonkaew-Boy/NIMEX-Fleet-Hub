@@ -292,3 +292,6 @@ svg.i{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-widt
 @media (max-width:900px){.ap-row{grid-template-columns:20px 1fr 1fr}}
 .rep-apset{margin-top:22px;border-top:2px solid var(--gold-l);padding-top:10px;display:flex;flex-direction:column;gap:6px}
 .rep-apset textarea{width:100%}
+.ap-show{font-weight:400;font-size:12.5px;margin-left:10px;color:var(--muted);cursor:pointer}
+.ap-p.off{opacity:.6;background:var(--hover)}
+.rep-t tr.off td{opacity:.5}
